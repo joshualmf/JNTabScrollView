@@ -29,6 +29,7 @@
 @interface JNTabScrollView ()
 {
     CGFloat     _tabButtonWidth;
+    NSMutableArray      *_tabButtons;
 }
 @end
 
@@ -49,7 +50,7 @@
     _titleTab = [[UIScrollView alloc] init];
     _contentView = [[UIScrollView alloc] init];
     _contentView.delegate = self;
-    
+    _tabButtons = [[NSMutableArray alloc] init];
     _currentIndex = 0;
 
     [self addSubview:_titleTab];
@@ -92,7 +93,6 @@
 - (void)drawRect:(CGRect)rect
 {
     [super drawRect:rect];
-    [self updateFrame];
     
     [self updateUI];
     
@@ -104,6 +104,7 @@
 - (void)layoutSubviews
 {
     [super layoutSubviews];
+    [self updateFrame];
 }
 
 - (void)setupTabs
@@ -114,19 +115,18 @@
         _tabButtonWidth = self.width / visibleNum;
         
         [self drawSelectedUnderlineWithSize:CGSizeMake(_tabButtonWidth, JNTabUnderLineWidth)];
+        [_tabButtons removeAllObjects];
         
         for (int i = 0; i < tabNum; i++) {
             NSString *title = [_dataSource titleOfTabAtIndex:i];
             UIButton *titleButton = [UIButton buttonWithType:UIButtonTypeSystem];
             [titleButton setTitle:title forState:UIControlStateNormal];
             [titleButton setTitleColor:self.fontColor forState:UIControlStateNormal];
-            [titleButton setTitleColor:self.underLineColor forState:UIControlStateFocused];
-            
-            [titleButton setBackgroundColor:[UIColor clearColor]];
             titleButton.frame = CGRectMake(i * _tabButtonWidth, self.tabHeight - self.tabHeight * JNTabTitleFactor, _tabButtonWidth, self.tabHeight * JNTabTitleFactor);
             titleButton.tag = i;
             [titleButton addTarget:self action:@selector(tabButtonClicked:) forControlEvents:UIControlEventTouchUpInside];
             [_titleTab addSubview:titleButton];
+            [_tabButtons addObject:titleButton];
         }
         [_titleTab setContentSize:CGSizeMake(tabNum * _tabButtonWidth, self.tabHeight * JNTabTitleFactor)];
         
@@ -190,6 +190,20 @@
         [_titleTab setContentOffset:CGPointMake(nextRect.origin.x, _titleTab.contentOffset.y) animated:YES];
     }
     _currentIndex = index;
+    
+    [self updateTabColor];
+}
+
+- (void)updateTabColor
+{
+    for (int i = 0; i < [_tabButtons count]; i++) {
+        UIButton *titleButton = [_tabButtons objectAtIndex:i];
+        if (_currentIndex == i) {
+            [titleButton setTitleColor:self.underLineColor forState:UIControlStateNormal];
+        } else {
+            [titleButton setTitleColor:self.fontColor forState:UIControlStateNormal];
+        }
+    }
 }
 
 - (void)scrollContentToIndex:(NSInteger)index
