@@ -28,6 +28,7 @@
 @property (nonatomic, strong) UIColor *fontColor;
 @property (nonatomic, strong) UIColor *underLineColor;
 @property (nonatomic, strong) UIColor *tabBackgroundColor;
-
 @property (nonatomic, assign) CGFloat tabHeight;
+
+@property (nonatomic, assign) NSInteger currentIndex;
 @end

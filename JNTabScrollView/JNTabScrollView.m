@@ -29,7 +29,6 @@
 @interface JNTabScrollView ()
 {
     CGFloat     _tabButtonWidth;
-    NSInteger   _currentIndex;
 }
 @end
 
@@ -94,12 +93,17 @@
 {
     [super drawRect:rect];
     [self updateFrame];
+    
+    [self updateUI];
+    
+    if (_currentIndex > 0) {
+        [self switchToIndex:_currentIndex];
+    }
 }
 
 - (void)layoutSubviews
 {
     [super layoutSubviews];
-    [self updateUI];
 }
 
 - (void)setupTabs
@@ -165,7 +169,6 @@
 {
     [self moveUnderlineToIndex:index];
     [self scrollContentToIndex:index];
-    _currentIndex = index;
 }
 
 - (void)moveUnderlineToIndex:(NSInteger)index
@@ -186,6 +189,7 @@
         // 下划线游标超过屏幕最左侧
         [_titleTab setContentOffset:CGPointMake(nextRect.origin.x, _titleTab.contentOffset.y) animated:YES];
     }
+    _currentIndex = index;
 }
 
 - (void)scrollContentToIndex:(NSInteger)index
@@ -206,9 +210,18 @@
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
     // TODO need to refine the scroll action
-    if (scrollView.decelerating) {
-        return;
-    }
+    
+//    NSInteger delta = ((NSInteger)_contentView.contentOffset.x) % ((NSInteger)self.width);
+//    if (delta >= self.width/2) {
+//        NSInteger index = round(_contentView.contentOffset.x / self.width);
+//        [self moveUnderlineToIndex:index];
+//        
+//    }
+
+    // 使用round就不用区分左滑还是右滑。
+    // 当滑动超过半个屏幕的时候，触发tab滑动
+    NSInteger index = round(_contentView.contentOffset.x / self.width);
+    [self moveUnderlineToIndex:index];
 }
 
 - (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
