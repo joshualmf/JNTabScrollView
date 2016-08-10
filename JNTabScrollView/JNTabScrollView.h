@@ -3,7 +3,7 @@
 //  pageControl
 //
 //  Created by Joshua on 16/8/4.
-//  Copyright © 2016年 Apple Inc. All rights reserved.
+//  Copyright © 2016年 JN. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>
@@ -30,5 +30,6 @@
 @property (nonatomic, strong) UIColor *tabBackgroundColor;
 @property (nonatomic, assign) CGFloat tabHeight;
 
-@property (nonatomic, assign) NSInteger currentIndex;
+@property (nonatomic, readonly) NSInteger currentIndex;
+@property (nonatomic, assign) NSInteger defaultIndex;
 @end

@@ -3,7 +3,7 @@
 //  pageControl
 //
 //  Created by Joshua on 16/8/4.
-//  Copyright © 2016年 Apple Inc. All rights reserved.
+//  Copyright © 2016年 JN. All rights reserved.
 //
 
 #import "JNTabScrollView.h"
@@ -12,7 +12,7 @@
 #define JNTabTitleFactor                (3/4.0f)
 #define JNTabUnderLineWidth             (2.0f)
 #define JNTabUnderLineAnimateInterval   (0.3f)
-#define JNTabSplitLineHeight            (2.0f)
+#define JNTabSplitLineHeight            (1.0f)
 
 @interface JNTabScrollView ()
 
@@ -96,8 +96,8 @@
     
     [self updateUI];
     
-    if (_currentIndex > 0) {
-        [self switchToIndex:_currentIndex];
+    if (_defaultIndex > 0) {
+        [self switchToIndex:_defaultIndex];
     }
 }
 
@@ -116,7 +116,6 @@
         
         [self drawSelectedUnderlineWithSize:CGSizeMake(_tabButtonWidth, JNTabUnderLineWidth)];
         [_tabButtons removeAllObjects];
-        
         for (int i = 0; i < tabNum; i++) {
             NSString *title = [_dataSource titleOfTabAtIndex:i];
             UIButton *titleButton = [UIButton buttonWithType:UIButtonTypeSystem];
@@ -167,7 +166,11 @@
 
 - (void)switchToIndex:(NSInteger)index
 {
-    [self moveUnderlineToIndex:index];
+    if (![self needScrollForIndex:index]) {
+        return;
+    }
+    
+    //[self moveUnderlineToIndex:index];
     [self scrollContentToIndex:index];
 }
 
@@ -181,7 +184,7 @@
     [UIView animateWithDuration:JNTabUnderLineAnimateInterval animations:^{
         _selectedUnderLine.frame = nextRect;
     }];
-    
+
     if (nextRect.origin.x + nextRect.size.width > _titleTab.contentOffset.x + self.width) {
         // 下划线游标超过屏幕最右侧
         [_titleTab setContentOffset:CGPointMake(nextRect.origin.x + _tabButtonWidth - self.width, _titleTab.contentOffset.y) animated:YES];
@@ -189,21 +192,38 @@
         // 下划线游标超过屏幕最左侧
         [_titleTab setContentOffset:CGPointMake(nextRect.origin.x, _titleTab.contentOffset.y) animated:YES];
     }
-    _currentIndex = index;
     
-    [self updateTabColor];
+    [self updateTabColor:index];
+    [self updateUnderLinePosition:index];
+    
+    _currentIndex = index;
 }
 
-- (void)updateTabColor
+- (void)updateTabColor:(NSInteger)index
 {
     for (int i = 0; i < [_tabButtons count]; i++) {
         UIButton *titleButton = [_tabButtons objectAtIndex:i];
-        if (_currentIndex == i) {
+        if (index == i) {
             [titleButton setTitleColor:self.underLineColor forState:UIControlStateNormal];
         } else {
             [titleButton setTitleColor:self.fontColor forState:UIControlStateNormal];
         }
     }
+}
+
+- (void)updateUnderLinePosition:(NSInteger)index
+{
+    CGFloat offsetMin = 0.0f;
+    CGFloat offsetMax = _titleTab.contentSize.width - self.width;
+    CGFloat offset = (index - 2) * _tabButtonWidth;
+    CGFloat finalOffset = MIN(MAX(offset, offsetMin), offsetMax);
+    
+    [_titleTab setContentOffset:CGPointMake(finalOffset, 0) animated:YES];
+}
+
+- (BOOL)needScrollForIndex:(NSInteger)index
+{
+    return (index < [_tabButtons count] && _currentIndex != index);
 }
 
 - (void)scrollContentToIndex:(NSInteger)index
@@ -214,31 +234,11 @@
 
 #pragma mark - scrollview scroll delegate
 
-// called when scroll view grinds to a halt
-- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
-{
-    NSInteger index = ceil(_contentView.contentOffset.x / self.width);
-    [self switchToIndex:index];
-}
-
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
-    // TODO need to refine the scroll action
-    
-//    NSInteger delta = ((NSInteger)_contentView.contentOffset.x) % ((NSInteger)self.width);
-//    if (delta >= self.width/2) {
-//        NSInteger index = round(_contentView.contentOffset.x / self.width);
-//        [self moveUnderlineToIndex:index];
-//        
-//    }
-
     // 使用round就不用区分左滑还是右滑。
     // 当滑动超过半个屏幕的时候，触发tab滑动
     NSInteger index = round(_contentView.contentOffset.x / self.width);
     [self moveUnderlineToIndex:index];
-}
-
-- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
-{
 }
 @end
