@@ -32,4 +32,6 @@
 
 @property (nonatomic, readonly) NSInteger currentIndex;
 @property (nonatomic, assign) NSInteger defaultIndex;
+
+@property (nonatomic, assign) NSInteger visibleCount;
 @end

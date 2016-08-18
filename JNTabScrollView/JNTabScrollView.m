@@ -52,6 +52,8 @@
     _contentView.delegate = self;
     _tabButtons = [[NSMutableArray alloc] init];
     _currentIndex = 0;
+    _visibleCount = 5;
+    _defaultIndex = -1;
 
     [self addSubview:_titleTab];
     [self addSubview:_contentView];
@@ -97,7 +99,7 @@
     [self updateUI];
     
     if (_defaultIndex > 0) {
-        [self switchToIndex:_defaultIndex];
+        [self switchToIndex:_defaultIndex animated:NO];
     }
 }
 
@@ -111,7 +113,7 @@
 {
     if (_dataSource && [_dataSource respondsToSelector:@selector(numberOfTabs)]) {
         NSInteger tabNum = [_dataSource numberOfTabs];
-        CGFloat visibleNum = MIN(5.5, tabNum);
+        CGFloat visibleNum = MIN(self.visibleCount + 0.5, tabNum);
         _tabButtonWidth = self.width / visibleNum;
         
         [self drawSelectedUnderlineWithSize:CGSizeMake(_tabButtonWidth, JNTabUnderLineWidth)];
@@ -159,44 +161,52 @@
 {
     if (button) {
         if (button.tag >= 0) {
-            [self switchToIndex:button.tag];
+            [self switchToIndex:button.tag animated:YES];
         }
     }
 }
 
-- (void)switchToIndex:(NSInteger)index
+- (void)switchToIndex:(NSInteger)index animated:(BOOL)animated
 {
     if (![self needScrollForIndex:index]) {
         return;
     }
     
     //[self moveUnderlineToIndex:index];
-    [self scrollContentToIndex:index];
+    [self scrollContentToIndex:index animated:animated];
 }
 
-- (void)moveUnderlineToIndex:(NSInteger)index
+- (void)moveUnderlineToIndex:(NSInteger)index animated:(BOOL)animated
 {
     CGRect pastRect = _selectedUnderLine.frame;
     
     CGRect nextRect = pastRect;
     nextRect.origin.x = index * _tabButtonWidth;
     
-    [UIView animateWithDuration:JNTabUnderLineAnimateInterval animations:^{
+    if (animated) {
+        [UIView animateWithDuration:JNTabUnderLineAnimateInterval animations:^{
+            _selectedUnderLine.frame = nextRect;
+        }];
+    } else {
         _selectedUnderLine.frame = nextRect;
-    }];
+    }
 
     if (nextRect.origin.x + nextRect.size.width > _titleTab.contentOffset.x + self.width) {
         // 下划线游标超过屏幕最右侧
-        [_titleTab setContentOffset:CGPointMake(nextRect.origin.x + _tabButtonWidth - self.width, _titleTab.contentOffset.y) animated:YES];
+        [_titleTab setContentOffset:CGPointMake(nextRect.origin.x + _tabButtonWidth - self.width, _titleTab.contentOffset.y) animated:animated];
     } else if (_titleTab.contentOffset.x > nextRect.origin.x) {
         // 下划线游标超过屏幕最左侧
-        [_titleTab setContentOffset:CGPointMake(nextRect.origin.x, _titleTab.contentOffset.y) animated:YES];
+        [_titleTab setContentOffset:CGPointMake(nextRect.origin.x, _titleTab.contentOffset.y) animated:animated];
     }
     
     [self updateTabColor:index];
-    [self updateUnderLinePosition:index];
+    [self updateUnderLinePosition:index animated:animated];
     
     _currentIndex = index;
+    if (index == _defaultIndex) {
+        // 初始化结束
+        _defaultIndex = -1;
+    }
 }
 
 - (void)updateTabColor:(NSInteger)index
@@ -211,14 +221,14 @@
     }
 }
 
-- (void)updateUnderLinePosition:(NSInteger)index
+- (void)updateUnderLinePosition:(NSInteger)index animated:(BOOL)animated
 {
     CGFloat offsetMin = 0.0f;
     CGFloat offsetMax = _titleTab.contentSize.width - self.width;
     CGFloat offset = (index - 2) * _tabButtonWidth;
     CGFloat finalOffset = MIN(MAX(offset, offsetMin), offsetMax);
     
-    [_titleTab setContentOffset:CGPointMake(finalOffset, 0) animated:YES];
+    [_titleTab setContentOffset:CGPointMake(finalOffset, 0) animated:animated];
 }
 
 - (BOOL)needScrollForIndex:(NSInteger)index
@@ -226,9 +236,9 @@
     return (index < [_tabButtons count] && _currentIndex != index);
 }
 
-- (void)scrollContentToIndex:(NSInteger)index
+- (void)scrollContentToIndex:(NSInteger)index animated:(BOOL)animated
 {
-    [_contentView setContentOffset:CGPointMake(index * self.width, 0) animated:YES];
+    [_contentView setContentOffset:CGPointMake(index * self.width, 0) animated:animated];
 }
 
 
@@ -239,6 +249,6 @@
     // 使用round就不用区分左滑还是右滑。
     // 当滑动超过半个屏幕的时候，触发tab滑动
     NSInteger index = round(_contentView.contentOffset.x / self.width);
-    [self moveUnderlineToIndex:index];
+    [self moveUnderlineToIndex:index animated:(_defaultIndex < 0)];
 }
 @end
