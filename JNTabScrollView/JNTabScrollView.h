@@ -10,6 +10,7 @@
 
 @protocol JNTabScrollViewDelegate <NSObject>
 
+- (void)scrollViewDidSelectTabAtIndex:(NSInteger)index;
 @end
 
 @protocol  JNTabScrollViewDataSource <NSObject>
@@ -33,5 +34,6 @@
 @property (nonatomic, readonly) NSInteger currentIndex;
 @property (nonatomic, assign) NSInteger defaultIndex;
 
-@property (nonatomic, assign) NSInteger visibleCount;
+@property (nonatomic, assign) NSUInteger visibleCount;
+@property (nonatomic, assign) NSUInteger tabGap;
 @end
