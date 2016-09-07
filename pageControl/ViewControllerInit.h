@@ -10,4 +10,5 @@
 
 @interface ViewControllerInit : UIViewController
 
+@property (nonatomic, assign) IBOutlet UIImageView *imageView;
 @end

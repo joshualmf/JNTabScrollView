@@ -41,9 +41,15 @@
                                     <segue destination="BYZ-38-t0r" kind="show" id="ZxW-sv-JwS"/>
                                 </connections>
                             </button>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="4j6-5g-YR5">
+                                <rect key="frame" x="33" y="79" width="150" height="50"/>
+                            </imageView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     </view>
+                    <connections>
+                        <outlet property="imageView" destination="4j6-5g-YR5" id="oKv-hC-fnk"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="VuS-Ou-B23" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>

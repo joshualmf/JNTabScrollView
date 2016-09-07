@@ -1,9 +1,8 @@
+
 //
 //  JNTabScrollView.m
 //  pageControl
 //
-//  Created by Joshua on 16/8/4.
-//  Copyright © 2016年 JN. All rights reserved.
 //
 
 #import "JNTabScrollView.h"
@@ -95,6 +94,8 @@
     [_titleTab setFrame:CGRectMake(0, 0, self.width, self.tabHeight)];
     [_contentView setFrame:CGRectMake(0, self.tabHeight + JNTabSplitLineHeight, self.width, self.height - self.tabHeight - JNTabSplitLineHeight)];
     
+    [_titleTab setBounces:NO];
+    [_contentView setBounces:NO];
     [self setupTabs];
 }
 
@@ -124,6 +125,9 @@
         CGFloat visibleNum = MIN(self.visibleCount + 0.5, _tabNum);
         _tabButtonWidth = self.width / visibleNum;
         
+        for (UIButton *button in _tabButtons) {
+            [button removeFromSuperview];
+        }
         [_tabButtons removeAllObjects];
         [_buttonLenghtArray removeAllObjects];
         
@@ -137,7 +141,7 @@
                                                                NSFontAttributeName : [UIFont systemFontOfSize:14.0f]
                                                                }
                                                     context: nil];
-            CGFloat buttonWidth = actualSize.size.width + _tabGap;
+            CGFloat buttonWidth = actualSize.size.width + JNTabGap;
             [_buttonLenghtArray addObject:@(buttonWidth)];
         }
         
